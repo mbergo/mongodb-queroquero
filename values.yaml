@@ -1,0 +1,49 @@
+replicaSet:
+  enabled: true
+  replicas: 1
+
+auth:
+  enabled: false
+
+service:
+  type: ClusterIP
+  port: 27017
+  externalAccess:
+    enabled: true
+    service:
+      type: LoadBalancer
+    port: 27018
+
+persistence:
+  enabled: true
+  size: 200Gi
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+podSecurityContext:
+  enabled: true
+  fsGroup: 1001
+
+containerSecurityContext:
+  enabled: true
+  runAsUser: 1001
+  runAsNonRoot: true
+
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 90
+  periodSeconds: 10
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 90
+  periodSeconds: 10
+
+# No password, auth is disabled
+rootPassword: ""
