@@ -12,19 +12,19 @@ service:
     enabled: true
     service:
       type: LoadBalancer
-    port: 27018
+    port: 27017
 
 persistence:
   enabled: true
-  size: 200Gi
+  size: 50Gi
 
 resources:
   limits:
     cpu: 500m
-    memory: 512Mi
+    memory: 2048Mi
   requests:
     cpu: 250m
-    memory: 256Mi
+    memory: 1024Mi
 
 podSecurityContext:
   enabled: true
