@@ -1,20 +1,18 @@
-replicaSet:
+replicaSetName: rs0
+replicaSetHostnames: true
+
+replicaCount: 3
+arbiter:
   enabled: true
-  replicas: 1
 
 auth:
   enabled: false
 
-architecture: replicaset
-
-service:
-  type: ClusterIP
-  port: 27017
-  externalAccess:
-    enabled: true
-    service:
-      type: LoadBalancer
-    port: 27017
+image:
+  registry: docker.io
+  repository: bitnami/mongodb
+  tag: 7.0.12-debian-12-r6
+  pullPolicy: IfNotPresent
 
 persistence:
   enabled: true
@@ -23,29 +21,43 @@ persistence:
 resources:
   limits:
     cpu: 500m
-    memory: 2048Mi
+    memory: 512Mi
   requests:
     cpu: 250m
-    memory: 1024Mi
+    memory: 256Mi
 
-podSecurityContext:
-  enabled: true
-  fsGroup: 1001
+arbiter:
+  persistence:
+    enabled: false
 
-containerSecurityContext:
-  enabled: true
-  runAsUser: 1001
-  runAsNonRoot: true
+# Node Selector to ensure that the MongoDB pods are placed on specific nodes with the key "data-private"
+nodeSelector:
+  data-private: "true"
 
-livenessProbe:
-  enabled: true
-  initialDelaySeconds: 90
-  periodSeconds: 10
+# Pod Affinity and Anti-Affinity
+affinity:
+  podAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: "app"
+              operator: In
+              values:
+                - mongodb
+        topologyKey: "kubernetes.io/hostname"
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: "app"
+                operator: In
+                values:
+                  - mongodb
+          topologyKey: "kubernetes.io/hostname"
 
-readinessProbe:
-  enabled: true
-  initialDelaySeconds: 90
-  periodSeconds: 10
-
-# No password, auth is disabled
-rootPassword: ""
+tolerations:
+  - key: "data-private"
+    operator: "Exists"
+    effect: "NoSchedule"
