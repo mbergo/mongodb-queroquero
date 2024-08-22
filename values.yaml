@@ -1,6 +1,8 @@
 replicaSetName: rs0
 replicaSetHostnames: true
 
+architecture: replicaset
+
 replicaCount: 3
 arbiter:
   enabled: true
@@ -30,11 +32,11 @@ arbiter:
   persistence:
     enabled: false
 
-# Node Selector to ensure that the MongoDB pods are placed on specific nodes with the key "data-private"
+# Node Selector to spread replicas across nodes with "data-private" label
 nodeSelector:
   data-private: "true"
 
-# Pod Affinity and Anti-Affinity
+# Pod Affinity and Anti-Affinity for better distribution across nodes
 affinity:
   podAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
@@ -61,3 +63,38 @@ tolerations:
   - key: "data-private"
     operator: "Exists"
     effect: "NoSchedule"
+
+# External Access Configuration using NodePort for VMware environment
+externalAccess:
+  enabled: true
+  service:
+    type: NodePort
+    nodePorts: [] # Kubernetes will auto-assign NodePort
+    port: 27017
+    annotations: {} # Any specific annotations needed can go here
+  autoDiscovery:
+    enabled: true # Enables auto-discovery, making it easier for nodes to join the replica set
+  servicePerPod: false # Use a single service for the entire replica set
+
+# External Access host and IP configuration (optional, leave empty for auto-discovery)
+externalAccessHostnames: []
+externalAccessIPs: []
+
+# Probes (Optional but recommended for production environments)
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+
+# Additional configurations (Optional based on the needs of your environment)
+diagnosticMode:
+  enabled: false
+  command: ['sleep']
+  args: ['infinity']
