@@ -5,6 +5,8 @@ replicaSet:
 auth:
   enabled: false
 
+architecture: replicaset
+
 service:
   type: ClusterIP
   port: 27017
